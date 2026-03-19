@@ -5,14 +5,22 @@ import EquationsList from './EquationsList'
 import PapersList from './PapersList'
 import ChatInterface from './ChatInterface'
 import Calculator from './Calculator'
+import PaperWriter from './PaperWriter'
+import TheoryExplorer from './TheoryExplorer'
+import UploadSection from './UploadSection'
 
 const Dashboard = ({ api }) => {
   const [activeTab, setActiveTab] = useState('status')
   const [scanStatus, setScanStatus] = useState(null)
+  const [memoryStats, setMemoryStats] = useState(null)
 
   useEffect(() => {
     loadScanStatus()
-    const interval = setInterval(loadScanStatus, 30000) // Refresh every 30s
+    loadMemoryStats()
+    const interval = setInterval(() => {
+      loadScanStatus()
+      loadMemoryStats()
+    }, 30000)
     return () => clearInterval(interval)
   }, [])
 
@@ -25,12 +33,24 @@ const Dashboard = ({ api }) => {
     }
   }
 
+  const loadMemoryStats = async () => {
+    try {
+      const response = await axios.get(`${api}/memory/stats`)
+      setMemoryStats(response.data)
+    } catch (err) {
+      console.error('Memory stats error:', err)
+    }
+  }
+
   const tabs = [
-    { id: 'status', label: 'SCAN_STATUS' },
+    { id: 'status', label: 'STATUS' },
     { id: 'equations', label: 'EQUATIONS' },
     { id: 'papers', label: 'PAPERS' },
-    { id: 'chat', label: 'QUERY_AI' },
-    { id: 'calculator', label: 'CALCULATOR' }
+    { id: 'theories', label: 'THEORIES' },
+    { id: 'chat', label: 'ARIA_AI' },
+    { id: 'calculator', label: 'CALCULATOR' },
+    { id: 'writer', label: 'PAPER_WRITER' },
+    { id: 'upload', label: 'UPLOAD' }
   ]
 
   return (
@@ -40,8 +60,8 @@ const Dashboard = ({ api }) => {
         <div className="border border-[#00ff00] p-4 mb-4">
           <pre className="text-xs">
 {`╔════════════════════════════════════════════════════════════════╗
-║  MATHEMATICAL SNIFFING AI                                      ║
-║  Self-Learning Autonomous System                               ║
+║  ARIA - Mathematical Intelligence System                      ║
+║  Playfully Dominant • Brutally Honest • Pattern Master       ║
 ║  [OFFICIAL // AUSTEO # Kyle Roberts Digital Stamp]            ║
 ║  [PM-KR-2026-NSW]                                             ║
 ╚════════════════════════════════════════════════════════════════╝`}
@@ -49,10 +69,32 @@ const Dashboard = ({ api }) => {
           
           {scanStatus && (
             <div className="mt-4 text-xs space-y-1">
-              <div>STATUS: <span className={scanStatus.is_active ? 'scan-pulse' : ''}>{scanStatus.is_active ? 'ACTIVE' : 'INACTIVE'}</span></div>
-              <div>SCAN_FREQ: {scanStatus.current_frequency_hours}h</div>
-              <div>LEARNING_RATE: {scanStatus.learning_rate.toFixed(2)} items/hour</div>
-              <div>DATABASE: {scanStatus.total_equations} equations | {scanStatus.total_papers} papers</div>
+              <div className="flex justify-between">
+                <div>
+                  <span className="opacity-70">STATUS:</span> 
+                  <span className={scanStatus.is_active ? 'scan-pulse ml-2' : 'ml-2'}>
+                    {scanStatus.is_active ? 'ACTIVE' : 'INACTIVE'}
+                  </span>
+                </div>
+                <div>
+                  <span className="opacity-70">SCAN_FREQ:</span> {scanStatus.current_frequency_hours}h
+                </div>
+              </div>
+              {memoryStats && (
+                <div className="flex justify-between">
+                  <div>
+                    <span className="opacity-70">MEMORY:</span> {memoryStats.total_items} items stored
+                  </div>
+                  <div>
+                    <span className="opacity-70">LEARNING_RATE:</span> {scanStatus.learning_rate.toFixed(2)} items/h
+                  </div>
+                </div>
+              )}
+              {scanStatus.theory_of_day && (
+                <div>
+                  <span className="opacity-70">TODAY'S THEORY:</span> {scanStatus.theory_of_day}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -78,8 +120,11 @@ const Dashboard = ({ api }) => {
           {activeTab === 'status' && <ScanStatus api={api} scanStatus={scanStatus} onRefresh={loadScanStatus} />}
           {activeTab === 'equations' && <EquationsList api={api} />}
           {activeTab === 'papers' && <PapersList api={api} />}
+          {activeTab === 'theories' && <TheoryExplorer api={api} />}
           {activeTab === 'chat' && <ChatInterface api={api} />}
           {activeTab === 'calculator' && <Calculator api={api} />}
+          {activeTab === 'writer' && <PaperWriter api={api} />}
+          {activeTab === 'upload' && <UploadSection api={api} />}
         </div>
       </div>
     </div>

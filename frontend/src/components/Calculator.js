@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import axios from 'axios'
+import { Copy } from 'lucide-react'
 
 const Calculator = ({ api }) => {
   const [expression, setExpression] = useState('')
   const [result, setResult] = useState('')
+  const [latex, setLatex] = useState('')
   const [history, setHistory] = useState([])
   const [error, setError] = useState('')
 
@@ -14,9 +16,11 @@ const Calculator = ({ api }) => {
     try {
       const response = await axios.post(`${api}/calculator`, { expression })
       setResult(response.data.result)
+      setLatex(response.data.latex)
       setHistory(prev => [{
         expression: response.data.expression,
         result: response.data.result,
+        latex: response.data.latex,
         timestamp: new Date().toISOString()
       }, ...prev].slice(0, 10))
     } catch (err) {
@@ -28,19 +32,35 @@ const Calculator = ({ api }) => {
     setExpression(prev => prev + func)
   }
 
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text)
+  }
+
   const functions = [
-    { label: 'sqrt', value: 'sqrt(' },
+    { label: '√', value: 'sqrt(' },
     { label: 'sin', value: 'sin(' },
     { label: 'cos', value: 'cos(' },
     { label: 'tan', value: 'tan(' },
+    { label: 'asin', value: 'asin(' },
+    { label: 'acos', value: 'acos(' },
+    { label: 'atan', value: 'atan(' },
     { label: 'log', value: 'log(' },
+    { label: 'log10', value: 'log10(' },
     { label: 'exp', value: 'exp(' },
     { label: 'π', value: 'pi' },
     { label: 'e', value: 'e' },
+    { label: 'φ', value: '(1+sqrt(5))/2' },
     { label: 'x²', value: '**2' },
     { label: 'xⁿ', value: '**' },
     { label: 'abs', value: 'abs(' },
-    { label: '!', value: 'factorial(' }
+    { label: 'x!', value: 'factorial(' },
+    { label: '(', value: '(' },
+    { label: ')', value: ')' },
+    { label: 'sinh', value: 'sinh(' },
+    { label: 'cosh', value: 'cosh(' },
+    { label: 'tanh', value: 'tanh(' },
+    { label: 'gcd', value: 'gcd(' },
+    { label: 'lcm', value: 'lcm(' }
   ]
 
   return (
@@ -93,8 +113,28 @@ const Calculator = ({ api }) => {
 
           {result && (
             <div data-testid="calc-result" className="mt-4 p-4 border border-[#00ff00] bg-[#00ff00] bg-opacity-10">
-              <div className="text-xs opacity-70 mb-1">RESULT:</div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-xs opacity-70">RESULT:</div>
+                <button
+                  onClick={() => copyToClipboard(result)}
+                  className="text-xs px-2 py-1 border border-[#00ff00] hover:bg-[#00ff00] hover:text-black flex items-center gap-1"
+                >
+                  <Copy size={12} />
+                  COPY
+                </button>
+              </div>
               <div className="text-2xl font-bold">{result}</div>
+              {latex && (
+                <div className="mt-2 text-xs opacity-70 border-t border-[#00ff00] border-opacity-30 pt-2">
+                  LaTeX: {latex}
+                  <button
+                    onClick={() => copyToClipboard(latex)}
+                    className="ml-2 text-xs underline hover:text-[#00ff00]"
+                  >
+                    copy
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
