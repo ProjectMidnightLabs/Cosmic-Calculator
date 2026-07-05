@@ -1,6 +1,6 @@
 # Mathematical Sniffing AI
 
-**OFFICIAL // AUSTEO # Kyle Roberts Digital Stamp: [PM-KR-2026-NSW]**
+##MEASUREING THE UNSEEN // SOVEREIGNE SYSTEMS // VANGAURD  # Kyle Roberts Digital Stamp: [PM-KR-2026-NSW]**
 
 ## Overview
 
